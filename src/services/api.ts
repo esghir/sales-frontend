@@ -1,4 +1,5 @@
-const API_BASE_URL = '/api';
+// API base URL - replace with your actual API URL
+const API_BASE = 'https://your-api-domain.com';
 
 interface ApiResponse<T> {
   data: T;
@@ -10,81 +11,146 @@ const getAuthHeader = (): Record<string, string> => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
+// API service functions
 export const api = {
-  async get<T>(endpoint: string): Promise<ApiResponse<T>> {
-    try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAuthHeader(),
-        },
-      });
-      
-      if (!response.ok) throw new Error('Request failed');
-      
-      const data = await response.json();
-      return { data };
-    } catch (error) {
-      return { data: null as T, error: (error as Error).message };
-    }
+  // Auth APIs
+  register: async (userData: any) => {
+    const response = await fetch(`${API_BASE}/api/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData)
+    });
+    return response.json();
+  },
+  
+  login: async (credentials: { username: string; password: string }) => {
+    const response = await fetch(`${API_BASE}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(credentials)
+    });
+    return response.json();
   },
 
-  async post<T>(endpoint: string, body: any): Promise<ApiResponse<T>> {
-    try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAuthHeader(),
-        },
-        body: JSON.stringify(body),
-      });
-      
-      if (!response.ok) throw new Error('Request failed');
-      
-      const data = await response.json();
-      return { data };
-    } catch (error) {
-      return { data: null as T, error: (error as Error).message };
-    }
+  // Product APIs
+  getProducts: async () => {
+    const response = await fetch(`${API_BASE}/api/products`);
+    return response.json();
   },
 
-  async put<T>(endpoint: string, body: any): Promise<ApiResponse<T>> {
-    try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAuthHeader(),
-        },
-        body: JSON.stringify(body),
-      });
-      
-      if (!response.ok) throw new Error('Request failed');
-      
-      const data = await response.json();
-      return { data };
-    } catch (error) {
-      return { data: null as T, error: (error as Error).message };
-    }
+  getProduct: async (id: number) => {
+    const response = await fetch(`${API_BASE}/api/products/${id}`);
+    return response.json();
   },
 
-  async delete<T>(endpoint: string): Promise<ApiResponse<T>> {
-    try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAuthHeader(),
-        },
-      });
-      
-      if (!response.ok) throw new Error('Request failed');
-      
-      const data = await response.json();
-      return { data };
-    } catch (error) {
-      return { data: null as T, error: (error as Error).message };
-    }
+  createProduct: async (product: any, token: string) => {
+    const response = await fetch(`${API_BASE}/api/products`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(product)
+    });
+    return response.json();
   },
+
+  updateProduct: async (id: number, product: any, token: string) => {
+    const response = await fetch(`${API_BASE}/api/products/${id}`, {
+      method: 'PUT',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(product)
+    });
+    return response.json();
+  },
+
+  deleteProduct: async (id: number, token: string) => {
+    const response = await fetch(`${API_BASE}/api/products/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return response.ok;
+  },
+
+  // Cart APIs
+  getCart: async (userId: number, token: string) => {
+    const response = await fetch(`${API_BASE}/api/cart/${userId}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return response.json();
+  },
+
+  addToCart: async (userId: number, productId: number, quantity: number, token: string) => {
+    const response = await fetch(`${API_BASE}/api/cart/${userId}/items?productId=${productId}&quantity=${quantity}`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return response.json();
+  },
+
+  updateCartItem: async (userId: number, productId: number, quantity: number, token: string) => {
+    const response = await fetch(`${API_BASE}/api/cart/${userId}/items/${productId}?quantity=${quantity}`, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return response.json();
+  },
+
+  removeFromCart: async (userId: number, productId: number, token: string) => {
+    const response = await fetch(`${API_BASE}/api/cart/${userId}/items/${productId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return response.json();
+  },
+
+  clearCart: async (userId: number, token: string) => {
+    const response = await fetch(`${API_BASE}/api/cart/${userId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return response.ok;
+  },
+
+  // Order APIs
+  getUserOrders: async (userId: number, token: string) => {
+    const response = await fetch(`${API_BASE}/api/orders/user/${userId}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return response.json();
+  },
+
+  getOrder: async (orderId: number, token: string) => {
+    const response = await fetch(`${API_BASE}/api/orders/${orderId}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return response.json();
+  },
+
+  createOrder: async (userId: number, token: string) => {
+    const response = await fetch(`${API_BASE}/api/orders/user/${userId}`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return response.json();
+  },
+
+  updateOrderStatus: async (orderId: number, status: string, token: string) => {
+    const response = await fetch(`${API_BASE}/api/orders/${orderId}/status?status=${status}`, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return response.json();
+  },
+
+  cancelOrder: async (orderId: number, token: string) => {
+    const response = await fetch(`${API_BASE}/api/orders/${orderId}/cancel`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return response.ok;
+  }
 }; 
