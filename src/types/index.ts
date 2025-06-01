@@ -1,28 +1,36 @@
 export interface Product {
   id: number;
   name: string;
-  price: number;
-  image: string;
   description: string;
+  price: number;
+  stock: number;
+  image: string;
+  category: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface User {
   id: number;
-  username: string;
-  role?: string;
+  email: string;
+  name: string;
+  role: string;
 }
 
 export interface CartItem {
-  id: number;
-  name: string;
-  price: number;
+  product: Product;
   quantity: number;
-  image: string;
 }
 
 export interface Order {
   id: number;
-  date: string;
+  items: CartItem[];
+  totalAmount: number;
   status: string;
-  total: number;
+  createdAt: string;
+}
+
+export interface AuthResponse {
+  user: User;
+  token: string;
 } 
